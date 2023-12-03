@@ -137,17 +137,41 @@ def cadastra_item():
     botao_inserir_item.pack(padx=10, pady=10)
 
 
+# def buscar_mala():
+#     for widget in frame_resultado_consulta_mala.winfo_children():
+#         widget.destroy()
+#     mala = entrada_consultar_mala.get().lower()
+#     banco = sqlite3.connect('Base dados malas')
+#     cursor = banco.cursor()
+#     seleciona = "SELECT * FROM malas WHERE mala = ?"
+#     cursor.execute(seleciona, (mala,))
+#     resultado = cursor.fetchall()
+#     nome_mala = customtkinter.CTkLabel(frame_resultado_consulta_mala, text='Itens alocados na mala {}'.format(mala))
+#     if resultado:
+#         nome_mala.grid(row=0,column=0)
+#         separacao = customtkinter.CTkLabel(frame_resultado_consulta_mala, text='-------------------------------')
+#         separacao.grid(row=1,column=0)
+#         for i in range(0,len(resultado)):
+#             itens_na_mala = customtkinter.CTkLabel(frame_resultado_consulta_mala, text='{}'.format(resultado[i][0]))
+#             itens_na_mala.grid(row=i+2,column=0)
+#
+#
+#     else:
+#         messagebox.showerror('Aviso', 'Mala não cadastrada')
+#     banco.close()
+
 def buscar_mala():
     for widget in frame_resultado_consulta_mala.winfo_children():
         widget.destroy()
     mala = entrada_consultar_mala.get().lower()
     banco = sqlite3.connect('Base dados malas')
     cursor = banco.cursor()
-    seleciona = "SELECT * FROM malas WHERE mala = ?"
-    cursor.execute(seleciona, (mala,))
+    seleciona = "SELECT * FROM malas"
+    cursor.execute(seleciona)
     resultado = cursor.fetchall()
+    print(resultado)
     nome_mala = customtkinter.CTkLabel(frame_resultado_consulta_mala, text='Itens alocados na mala {}'.format(mala))
-    if resultado:
+    if any(mala in elemento for elemento in resultado):
         nome_mala.grid(row=0,column=0)
         separacao = customtkinter.CTkLabel(frame_resultado_consulta_mala, text='-------------------------------')
         separacao.grid(row=1,column=0)
@@ -159,26 +183,57 @@ def buscar_mala():
     else:
         messagebox.showerror('Aviso', 'Mala não cadastrada')
     banco.close()
+
+
 def buscar_item():
     for widget in frame_resultado_consulta_item.winfo_children():
         widget.destroy()
-    item = entrada_consultar_item.get().lower()
+
+    item = entrada_consultar_item.get().lower()  # Convertendo para minúsculas
     banco = sqlite3.connect('Base dados malas')
     cursor = banco.cursor()
-    seleciona = "SELECT * FROM malas WHERE item = ?"
-    cursor.execute(seleciona, (item,))
+    seleciona = "SELECT * FROM malas"
+    cursor.execute(seleciona, )
     resultado = cursor.fetchall()
-    if resultado:
-        for i in range(0,len(resultado)):
+
+    resultados_encontrados = [elemento for elemento in resultado if item in elemento[0].lower()]
+    if resultados_encontrados:
+        for i, resultado_encontrado in enumerate(resultados_encontrados):
             busca_posicao = "SELECT * FROM localizacao WHERE mala = ?"
-            cursor.execute(busca_posicao, (resultado[i][1],))
+            cursor.execute(busca_posicao, (resultado_encontrado[1],))
             resultado_posicao = cursor.fetchall()
-            malas_dos_itens= customtkinter.CTkLabel(frame_resultado_consulta_item,text='Existe {} alocado na mala {} posição {}'.format(item,resultado_posicao[0][0],resultado_posicao[0][1]))
-            malas_dos_itens.grid(row=i,column=0)
+
+            malas_dos_itens = customtkinter.CTkLabel(
+                frame_resultado_consulta_item,
+                text='Existe {} alocado em {} posição {}'.format(resultados_encontrados[i][0], resultado_posicao[0][0],
+                                                                      resultado_posicao[0][1])
+            )
+            malas_dos_itens.grid(row=i, column=0)
     else:
         messagebox.showerror('Aviso', 'Item não cadastrado')
+
     banco.commit()
     banco.close()
+# def buscar_item():
+#     for widget in frame_resultado_consulta_item.winfo_children():
+#         widget.destroy()
+#     item = entrada_consultar_item.get().lower()
+#     banco = sqlite3.connect('Base dados malas')
+#     cursor = banco.cursor()
+#     seleciona = "SELECT * FROM malas WHERE item = ?"
+#     cursor.execute(seleciona, (item,))
+#     resultado = cursor.fetchall()
+#     if resultado:
+#         for i in range(0,len(resultado)):
+#             busca_posicao = "SELECT * FROM localizacao WHERE mala = ?"
+#             cursor.execute(busca_posicao, (resultado[i][1],))
+#             resultado_posicao = cursor.fetchall()
+#             malas_dos_itens= customtkinter.CTkLabel(frame_resultado_consulta_item,text='Existe {} alocado na mala {} posição {}'.format(item,resultado_posicao[0][0],resultado_posicao[0][1]))
+#             malas_dos_itens.grid(row=i,column=0)
+#     else:
+#         messagebox.showerror('Aviso', 'Item não cadastrado')
+#     banco.commit()
+#     banco.close()
 
 def consulta_mala():
     frame_menu.forget()
